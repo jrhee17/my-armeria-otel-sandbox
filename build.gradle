@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.github.jrhee17'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.linecorp.armeria:armeria:1.25.2'
+    testImplementation 'com.linecorp.armeria:armeria-junit5:1.25.2'
+
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs "-javaagent:${project.rootDir}/opentelemetry-javaagent.jar"
+    jvmArgs "-Dotel.javaagent.debug=true"
+    jvmArgs "-Dotel.traces.exporter=logging"
+    jvmArgs "-Dotel.metrics.exporter=none"
+}
