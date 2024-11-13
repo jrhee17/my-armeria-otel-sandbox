@@ -16,13 +16,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.linecorp.armeria.client.logging.LoggingClient;
 import com.linecorp.armeria.client.retrofit2.ArmeriaRetrofit;
 import com.linecorp.armeria.common.HttpResponse;
-import com.linecorp.armeria.common.logging.LogFormatter;
-import com.linecorp.armeria.common.logging.LogWriter;
 import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.logging.LoggingService;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
 
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Context;
 import retrofit2.Converter;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import retrofit2.http.GET;
@@ -65,6 +64,8 @@ class RetrofitTest {
         Service service = ArmeriaRetrofit.builder(server3.httpUri())
                                          .addConverterFactory(converterFactory)
                                          .decorator((delegate, ctx, req) -> {
+                                             final Context current = Context.current();
+                                             ctx.hook(current::makeCurrent);
                                              logger.info("traceId from custom decorator: {}", Span.current().getSpanContext().getTraceId());
                                              logger.info("traceparent from header: {}", ctx.additionalRequestHeaders().get("traceparent"));
                                              return delegate.execute(ctx, req);
